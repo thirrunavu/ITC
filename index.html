@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCQ – Information Theory & Coding</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #111827;
+    --bg3: #1a2235;
+    --card: #141c2e;
+    --border: #1e2d45;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --accent4: #f59e0b;
+    --danger: #ef4444;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --correct: #10b981;
+    --wrong: #ef4444;
+    --font-head: 'Syne', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+    --radius: 12px;
+    --radius-lg: 18px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* Grid bg pattern */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  /* ===== SCREENS ===== */
+  .screen { display: none; position: relative; z-index: 1; }
+  .screen.active { display: block; }
+
+  /* ===== LANDING ===== */
+  #landing {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+  }
+  #landing .badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+  }
+  #landing h1 {
+    font-family: var(--font-head);
+    font-size: clamp(2.2rem, 6vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+  #landing h1 span { color: var(--accent); }
+  #landing .sub {
+    color: var(--text2);
+    font-size: 13px;
+    margin-bottom: 2.5rem;
+    max-width: 480px;
+    line-height: 1.8;
+  }
+  .form-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    width: 100%;
+    max-width: 480px;
+    text-align: left;
+  }
+  .form-card h3 {
+    font-family: var(--font-head);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.05em;
+  }
+  .field { margin-bottom: 1.2rem; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 6px;
+  }
+  .field input, .field select {
+    width: 100%;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+  .field input.error { border-color: var(--danger); }
+  .err-msg { color: var(--danger); font-size: 11px; margin-top: 4px; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: var(--font-head);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 12px 28px;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+    width: 100%;
+  }
+  .btn-primary:hover { background: #00b8d4; transform: translateY(-1px); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+  }
+  .btn-secondary:hover { background: rgba(0,229,255,0.08); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-success { background: var(--correct); color: #fff; }
+  .btn-success:hover { background: #059669; }
+  .stats-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .stat-pill {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 11px;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .stat-pill span { color: var(--accent); font-weight: 700; }
+
+  /* ===== QUIZ ===== */
+  #quiz { padding: 1rem; max-width: 800px; margin: 0 auto; padding-bottom: 120px; }
+  .quiz-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .quiz-header .title-group { display: flex; flex-direction: column; gap: 2px; }
+  .quiz-header h2 {
+    font-family: var(--font-head);
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .quiz-header .user-info { font-size: 11px; color: var(--accent); }
+  .timer-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 16px;
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 90px;
+    text-align: center;
+    transition: color 0.3s;
+  }
+  .timer-box.warning { color: var(--accent4); border-color: var(--accent4); }
+  .timer-box.danger { color: var(--danger); border-color: var(--danger); animation: pulse 0.5s infinite alternate; }
+  @keyframes pulse { from { opacity: 1; } to { opacity: 0.5; } }
+  .progress-wrap {
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--bg3);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+  .progress-label { font-size: 11px; color: var(--text2); white-space: nowrap; }
+  .question-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.8rem;
+    margin-bottom: 1.5rem;
+    animation: fadeSlide 0.3s ease;
+  }
+  @keyframes fadeSlide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .q-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .q-num {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .q-difficulty {
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-family: var(--font-head);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+  .diff-easy { background: rgba(16,185,129,0.15); color: var(--correct); }
+  .diff-medium { background: rgba(245,158,11,0.15); color: var(--accent4); }
+  .diff-hard { background: rgba(239,68,68,0.15); color: var(--danger); }
+  .q-text {
+    font-family: var(--font-head);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .option:hover:not(.disabled) { border-color: var(--accent); background: rgba(0,229,255,0.05); }
+  .option .opt-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .option.selected { border-color: var(--accent); background: rgba(0,229,255,0.08); }
+  .option.selected .opt-label { background: var(--accent); color: #000; border-color: var(--accent); }
+  .option.correct { border-color: var(--correct); background: rgba(16,185,129,0.1); }
+  .option.correct .opt-label { background: var(--correct); color: #fff; border-color: var(--correct); }
+  .option.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.08); }
+  .option.wrong .opt-label { background: var(--wrong); color: #fff; border-color: var(--wrong); }
+  .option.disabled { cursor: default; }
+  .explanation {
+    margin-top: 1rem;
+    padding: 10px 14px;
+    background: rgba(0,229,255,0.05);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.7;
+    animation: fadeIn 0.3s;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .nav-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(10,14,26,0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    z-index: 100;
+  }
+  .nav-dots {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    max-width: calc(100% - 200px);
+    overflow: hidden;
+  }
+  .nav-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    color: var(--text3);
+    transition: all 0.15s;
+  }
+  .nav-dot.current { border-color: var(--accent); color: var(--accent); }
+  .nav-dot.answered-correct { background: rgba(16,185,129,0.2); border-color: var(--correct); color: var(--correct); }
+  .nav-dot.answered-wrong { background: rgba(239,68,68,0.15); border-color: var(--wrong); color: var(--wrong); }
+  .nav-actions { display: flex; gap: 8px; }
+
+  /* ===== RESULTS ===== */
+  #results { padding: 1.5rem; max-width: 900px; margin: 0 auto; }
+  .results-header {
+    text-align: center;
+    padding: 2rem 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+  .results-header h2 {
+    font-family: var(--font-head);
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+  .score-ring {
+    width: 160px;
+    height: 160px;
+    margin: 1.5rem auto;
+    position: relative;
+  }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring .score-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .score-ring .score-pct {
+    font-family: var(--font-head);
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+  }
+  .score-ring .score-lbl { font-size: 10px; color: var(--text2); letter-spacing: 0.1em; }
+  .grade-badge {
+    display: inline-block;
+    padding: 6px 24px;
+    border-radius: 30px;
+    font-family: var(--font-head);
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0.5rem 0;
+  }
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+  .metric-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    text-align: center;
+  }
+  .metric-card .m-val {
+    font-family: var(--font-head);
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--accent);
+  }
+  .metric-card .m-lbl { font-size: 10px; color: var(--text2); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; }
+  .section-title {
+    font-family: var(--font-head);
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.05em;
+  }
+  .section-title::before {
+    content: '';
+    width: 4px;
+    height: 18px;
+    background: var(--accent);
+    border-radius: 2px;
+    display: block;
+  }
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .response-sheet { margin-bottom: 2rem; }
+  .rs-row {
+    display: grid;
+    grid-template-columns: 40px 1fr 80px 80px;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    margin-bottom: 4px;
+    font-size: 12px;
+    align-items: center;
+  }
+  .rs-row.header { background: var(--bg3); color: var(--text2); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .rs-row.correct-row { background: rgba(16,185,129,0.07); border: 1px solid rgba(16,185,129,0.2); }
+  .rs-row.wrong-row { background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.15); }
+  .rs-row.skipped-row { background: rgba(100,116,139,0.1); border: 1px solid rgba(100,116,139,0.2); color: var(--text3); }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+  }
+  .dot-c { background: var(--correct); }
+  .dot-w { background: var(--wrong); }
+  .dot-s { background: var(--text3); }
+
+  /* ===== DASHBOARD ===== */
+  #dashboard { padding: 1.5rem; max-width: 1000px; margin: 0 auto; }
+  .dash-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .dash-header h2 {
+    font-family: var(--font-head);
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #fff;
+  }
+  .leaderboard { margin-bottom: 2rem; }
+  .lb-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    margin-bottom: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    transition: border-color 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .lb-row.rank1 { border-color: #f59e0b; }
+  .lb-row.rank1::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #f59e0b; }
+  .lb-row.rank2::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #94a3b8; }
+  .lb-row.rank3::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #b45309; }
+  .lb-rank {
+    font-family: var(--font-head);
+    font-size: 1rem;
+    font-weight: 800;
+    width: 32px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .lb-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: var(--font-head);
+    flex-shrink: 0;
+  }
+  .lb-info { flex: 1; }
+  .lb-name { font-family: var(--font-head); font-size: 0.9rem; font-weight: 600; color: #fff; }
+  .lb-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .lb-score {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-align: right;
+  }
+  .lb-grade {
+    font-size: 11px;
+    color: var(--text2);
+    text-align: right;
+  }
+  .award-banner {
+    background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05));
+    border: 1px solid rgba(245,158,11,0.4);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .award-icon { font-size: 3rem; }
+  .award-text h3 {
+    font-family: var(--font-head);
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--accent4);
+    margin-bottom: 4px;
+  }
+  .award-text p { font-size: 12px; color: var(--text2); line-height: 1.6; }
+  .email-form {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .email-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .email-row input {
+    flex: 1;
+    min-width: 200px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .email-row input:focus { border-color: var(--accent); }
+  .action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .action-row .btn { flex: 1; min-width: 160px; max-width: 220px; }
+
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 20px;
+    font-size: 13px;
+    color: var(--text);
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .nav-dots { max-width: calc(100% - 160px); }
+    .rs-row { grid-template-columns: 32px 1fr 60px; font-size: 11px; }
+    .rs-row .rs-answer { display: none; }
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ===== SCREEN: LANDING ===== -->
+<div id="landing" class="screen active">
+  <div class="badge">Academic Assessment Tool</div>
+  <h1>Information Theory<br><span>&amp; Coding</span></h1>
+  <p class="sub">25 questions · Timed quiz · Instant grading<br>Covers entropy, channels, coding, compression &amp; more</p>
+  <div class="stats-row" style="justify-content:center">
+    <div class="stat-pill"><span id="l-attempts">0</span> Attempts</div>
+    <div class="stat-pill">High: <span id="l-high">—</span></div>
+    <div class="stat-pill">Avg: <span id="l-avg">—</span></div>
+  </div>
+  <div class="form-card">
+    <h3>// Enter Details</h3>
+    <div class="field">
+      <label>Full Name</label>
+      <input type="text" id="inp-name" placeholder="e.g. Arjun Sharma">
+      <div class="err-msg" id="err-name"></div>
+    </div>
+    <div class="field">
+      <label>Roll Number / ID</label>
+      <input type="text" id="inp-roll" placeholder="e.g. 21CS101">
+      <div class="err-msg" id="err-roll"></div>
+    </div>
+    <div class="field">
+      <label>Email Address</label>
+      <input type="email" id="inp-email" placeholder="you@example.com">
+      <div class="err-msg" id="err-email"></div>
+    </div>
+    <div class="field">
+      <label>Department</label>
+      <select id="inp-dept">
+        <option value="">Select Department</option>
+        <option>Computer Science &amp; Engineering</option>
+        <option>Electronics &amp; Communication</option>
+        <option>Information Technology</option>
+        <option>Electrical Engineering</option>
+        <option>Other</option>
+      </select>
+      <div class="err-msg" id="err-dept"></div>
+    </div>
+    <button class="btn btn-primary" onclick="startQuiz()">Start Quiz →</button>
+  </div>
+  <div style="margin-top:1.5rem">
+    <button class="btn btn-secondary" onclick="showDashboard()">View Dashboard</button>
+  </div>
+</div>
+
+<!-- ===== SCREEN: QUIZ ===== -->
+<div id="quiz" class="screen">
+  <div class="quiz-header">
+    <div class="title-group">
+      <h2>Information Theory &amp; Coding</h2>
+      <div class="user-info" id="quiz-user"></div>
+    </div>
+    <div class="timer-box" id="timer">25:00</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-label" id="progress-label">0 / 25</div>
+  </div>
+  <div id="question-area"></div>
+  <div class="nav-bar">
+    <div class="nav-dots" id="nav-dots"></div>
+    <div class="nav-actions">
+      <button class="btn btn-secondary" id="btn-prev" onclick="navigate(-1)" style="padding:10px 16px">◀</button>
+      <button class="btn btn-primary" id="btn-next" onclick="navigate(1)" style="padding:10px 16px">▶</button>
+      <button class="btn btn-success" onclick="confirmSubmit()" style="padding:10px 16px; font-size:12px">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: RESULTS ===== -->
+<div id="results" class="screen">
+  <div class="results-header">
+    <div id="award-display"></div>
+    <h2>Quiz Results</h2>
+    <div id="result-name" style="color:var(--text2);font-size:13px;margin-bottom:1rem"></div>
+    <div class="score-ring">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <circle cx="80" cy="80" r="66" fill="none" stroke="var(--border)" stroke-width="12"/>
+        <circle cx="80" cy="80" r="66" fill="none" stroke="var(--accent)" stroke-width="12"
+          stroke-dasharray="414.69"
+          stroke-dashoffset="414.69"
+          stroke-linecap="round"
+          id="ring-fill"/>
+      </svg>
+      <div class="score-text">
+        <div class="score-pct" id="score-pct">0%</div>
+        <div class="score-lbl">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-badge"></div>
+  </div>
+
+  <div class="metrics-grid" id="metrics-grid"></div>
+
+  <div class="chart-card">
+    <div class="section-title">Wrong Answers by Topic</div>
+    <canvas id="wrong-chart" height="80"></canvas>
+  </div>
+
+  <div class="response-sheet">
+    <div class="section-title">Response Sheet</div>
+    <div class="rs-row header">
+      <div>#</div><div>Question</div><div>Your Ans</div><div>Correct</div>
+    </div>
+    <div id="response-rows"></div>
+  </div>
+
+  <div class="action-row" style="margin-top:1rem">
+    <button class="btn btn-primary" onclick="downloadPDF()">⬇ Download PDF</button>
+    <button class="btn btn-secondary" onclick="showDashboard()">Dashboard</button>
+    <button class="btn btn-secondary" onclick="resetQuiz()">Retake</button>
+  </div>
+</div>
+
+<!-- ===== SCREEN: DASHBOARD ===== -->
+<div id="dashboard" class="screen">
+  <div class="dash-header">
+    <h2>// Dashboard</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-secondary" onclick="showScreen('landing')" style="font-size:12px;padding:8px 16px">New Quiz</button>
+      <button class="btn btn-danger" onclick="clearAll()" style="font-size:12px;padding:8px 16px">Clear All</button>
+    </div>
+  </div>
+
+  <div id="award-topper"></div>
+
+  <div class="metrics-grid" id="dash-metrics"></div>
+
+  <div class="chart-card">
+    <div class="section-title">Score Distribution</div>
+    <canvas id="dist-chart" height="80"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <div class="section-title">Wrong Answers by Topic (All Attempts)</div>
+    <canvas id="dash-wrong-chart" height="80"></canvas>
+  </div>
+
+  <div class="email-form">
+    <div class="section-title" style="margin-bottom:0.75rem">Send Score Report</div>
+    <p style="font-size:11px;color:var(--text2);margin-bottom:1rem">Simulate sending score via mailto link (opens mail client)</p>
+    <div class="field">
+      <label>Select Attempt</label>
+      <select id="email-select" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-mono);font-size:13px;padding:10px 14px;outline:none;width:100%"></select>
+    </div>
+    <div class="email-row">
+      <input type="email" id="email-to" placeholder="Recipient email">
+      <button class="btn btn-primary" onclick="sendScore()" style="width:auto">Send →</button>
+    </div>
+  </div>
+
+  <div class="leaderboard">
+    <div class="section-title">Leaderboard</div>
+    <div id="leaderboard-list"></div>
+  </div>
+</div>
+
+<script>
+/* ===== QUESTION BANK ===== */
+const QUESTIONS = [
+  {
+    q: "Shannon's entropy formula H(X) = -Σ p(x) log₂ p(x) measures which quantity?",
+    opts: ["Energy in a signal","Average information content of a source","Signal bandwidth","Noise power"],
+    ans: 1, topic: "Entropy",
+    diff: "easy",
+    exp: "Shannon entropy quantifies the average amount of information (surprise) produced by a probabilistic source. Higher entropy means more uncertainty."
+  },
+  {
+    q: "A binary source with equal probability (p = 0.5) has an entropy of:",
+    opts: ["0 bits","0.5 bits","1 bit","2 bits"],
+    ans: 2, topic: "Entropy",
+    diff: "easy",
+    exp: "H = -0.5·log₂(0.5) - 0.5·log₂(0.5) = 0.5 + 0.5 = 1 bit. Maximum entropy for a binary source."
+  },
+  {
+    q: "The channel capacity C of an AWGN channel is given by Shannon's formula as:",
+    opts: ["C = B log₂(1 + S/N)","C = B · S/N","C = log₂(S/N)","C = B²·(S/N)"],
+    ans: 0, topic: "Channel Capacity",
+    diff: "medium",
+    exp: "Shannon-Hartley theorem: C = B·log₂(1 + SNR), where B is bandwidth and SNR is signal-to-noise ratio."
+  },
+  {
+    q: "Which source coding theorem states that the minimum average code length ≥ entropy?",
+    opts: ["Channel coding theorem","Nyquist theorem","Shannon's noiseless coding theorem","Kraft inequality"],
+    ans: 2, topic: "Source Coding",
+    diff: "medium",
+    exp: "Shannon's first theorem (noiseless channel coding) states that the minimum achievable average code length is bounded below by source entropy H(X)."
+  },
+  {
+    q: "Huffman coding produces:",
+    opts: ["Fixed-length codes","Variable-length prefix-free codes","Block codes","Convolutional codes"],
+    ans: 1, topic: "Source Coding",
+    diff: "easy",
+    exp: "Huffman coding assigns shorter codewords to more frequent symbols, resulting in variable-length, uniquely decodable prefix-free codes."
+  },
+  {
+    q: "The Kraft inequality for a uniquely decodable code with lengths l₁, l₂,..., lₙ over alphabet D states:",
+    opts: ["Σ D^lᵢ ≥ 1","Σ D^(-lᵢ) ≤ 1","Σ lᵢ = 1","Σ D^lᵢ = 0"],
+    ans: 1, topic: "Source Coding",
+    diff: "hard",
+    exp: "The Kraft-McMillan inequality: Σ D^(-lᵢ) ≤ 1 is a necessary condition for uniquely decodable codes over a D-ary alphabet."
+  },
+  {
+    q: "Mutual information I(X;Y) between random variables X and Y is defined as:",
+    opts: ["H(X) - H(Y)","H(X) + H(Y) - H(X,Y)","H(X|Y)","H(X,Y)"],
+    ans: 1, topic: "Mutual Information",
+    diff: "medium",
+    exp: "Mutual information I(X;Y) = H(X) + H(Y) - H(X,Y) = H(X) - H(X|Y). It measures the information shared between X and Y."
+  },
+  {
+    q: "Which coding technique uses a trellis diagram for decoding?",
+    opts: ["Huffman coding","Reed-Solomon coding","Convolutional coding (Viterbi)","Arithmetic coding"],
+    ans: 2, topic: "Channel Coding",
+    diff: "medium",
+    exp: "Convolutional codes use the Viterbi algorithm which navigates a trellis diagram (state diagram over time) to find the maximum likelihood path."
+  },
+  {
+    q: "A (7,4) Hamming code can correct how many bit errors?",
+    opts: ["1","2","3","4"],
+    ans: 0, topic: "Error Correction",
+    diff: "easy",
+    exp: "(7,4) Hamming code has minimum Hamming distance d_min = 3, giving it single-error correction (t = ⌊(3-1)/2⌋ = 1)."
+  },
+  {
+    q: "In a (n, k) linear block code, the code rate R is:",
+    opts: ["n/k","k/n","(n-k)/n","n/(n-k)"],
+    ans: 1, topic: "Channel Coding",
+    diff: "easy",
+    exp: "Code rate R = k/n represents the ratio of information bits k to total transmitted bits n. Higher R means more efficiency."
+  },
+  {
+    q: "The minimum Hamming distance required to detect d errors is:",
+    opts: ["d","d+1","2d","2d+1"],
+    ans: 1, topic: "Error Detection",
+    diff: "medium",
+    exp: "To detect d errors, the minimum distance must be at least d+1. This ensures that d errors cannot transform one valid codeword into another."
+  },
+  {
+    q: "Lempel-Ziv (LZ77/LZ78) is an example of:",
+    opts: ["Lossy compression","Lossless dictionary-based compression","Transform coding","Predictive coding"],
+    ans: 1, topic: "Compression",
+    diff: "medium",
+    exp: "LZ algorithms are universal lossless compression algorithms that build adaptive dictionaries from previously seen data without prior knowledge of source statistics."
+  },
+  {
+    q: "Which property does a cyclic code possess that makes encoding/decoding efficient?",
+    opts: ["Fixed weight codewords","Every cyclic shift of a codeword is also a codeword","Maximum distance separable","Linear over GF(4)"],
+    ans: 1, topic: "Cyclic Codes",
+    diff: "hard",
+    exp: "In a cyclic code, a cyclic shift of any codeword is also a valid codeword. This property enables implementation using simple shift registers."
+  },
+  {
+    q: "Shannon's channel capacity theorem guarantees reliable communication if:",
+    opts: ["Bandwidth is infinite","Data rate R < channel capacity C","Noise power = 0","SNR > 100 dB"],
+    ans: 1, topic: "Channel Capacity",
+    diff: "medium",
+    exp: "Shannon's second theorem: if transmission rate R < C (channel capacity), there exist codes that achieve arbitrarily low error probability."
+  },
+  {
+    q: "The generator polynomial of a (7,4) Hamming code over GF(2) is:",
+    opts: ["g(x) = x² + 1","g(x) = x³ + x + 1","g(x) = x⁴ + x + 1","g(x) = x⁷ + 1"],
+    ans: 1, topic: "Cyclic Codes",
+    diff: "hard",
+    exp: "The generator polynomial g(x) = x³ + x + 1 generates the (7,4) Hamming code. It is a primitive polynomial of degree r = n-k = 3."
+  },
+  {
+    q: "Arithmetic coding achieves compression close to which bound?",
+    opts: ["Nyquist limit","Shannon entropy","Nyquist-Shannon sampling theorem","Gallager bound"],
+    ans: 1, topic: "Source Coding",
+    diff: "medium",
+    exp: "Arithmetic coding can approach the Shannon entropy limit more closely than Huffman coding, especially for sources with probabilities that are not powers of 1/2."
+  },
+  {
+    q: "The turbo code concept was introduced by Berrou et al. and uses:",
+    opts: ["Single convolutional code","Two recursive systematic convolutional codes with interleaver","Reed-Solomon outer code","LDPC codes"],
+    ans: 1, topic: "Advanced Codes",
+    diff: "hard",
+    exp: "Turbo codes use two RSC (Recursive Systematic Convolutional) encoders connected in parallel with an interleaver, achieving near-Shannon-limit performance."
+  },
+  {
+    q: "Which modulation scheme has the highest spectral efficiency for a given SNR?",
+    opts: ["BPSK","QPSK","16-QAM","64-QAM (high SNR regime)"],
+    ans: 3, topic: "Channel Capacity",
+    diff: "medium",
+    exp: "64-QAM encodes 6 bits/symbol compared to 2 bits/symbol for QPSK, giving higher spectral efficiency, though it requires higher SNR to maintain BER."
+  },
+  {
+    q: "LDPC (Low-Density Parity-Check) codes are decoded using:",
+    opts: ["Berlekamp-Massey algorithm","Belief propagation on a Tanner graph","Viterbi algorithm","Euclidean algorithm"],
+    ans: 1, topic: "Advanced Codes",
+    diff: "hard",
+    exp: "LDPC codes are decoded using iterative belief propagation (sum-product algorithm) on a bipartite Tanner graph of variable and check nodes."
+  },
+  {
+    q: "The entropy rate of an i.i.d. source with distribution {p₁, p₂,..., pₖ} equals:",
+    opts: ["H(p₁, p₂,..., pₖ) per symbol","H(X₁) + H(X₂) total","0","H(X₁ | X₂)"],
+    ans: 0, topic: "Entropy",
+    diff: "medium",
+    exp: "For an i.i.d. source, the entropy rate equals the entropy H(X) of a single random variable, which is H = -Σ pᵢ log₂(pᵢ) bits per symbol."
+  },
+  {
+    q: "Run-Length Encoding (RLE) is most effective for:",
+    opts: ["Random binary data","Data with long sequences of repeated symbols","Highly compressed data","Encrypted data"],
+    ans: 1, topic: "Compression",
+    diff: "easy",
+    exp: "RLE replaces consecutive identical symbols with a count and the symbol. It is highly efficient for data with long runs, such as simple bitmap images or binary data."
+  },
+  {
+    q: "The parity check matrix H of a linear block code satisfies:",
+    opts: ["H·G = I","H·cᵀ = 0 for all valid codewords c","G·Hᵀ = 0 always fails","H·H = I"],
+    ans: 1, topic: "Error Correction",
+    diff: "hard",
+    exp: "For any valid codeword c in a linear block code, H·cᵀ = 0. The syndrome s = H·rᵀ of a received word r reveals error patterns."
+  },
+  {
+    q: "Differential entropy of a Gaussian random variable X ~ N(0, σ²) is:",
+    opts: ["log₂(σ)","½ log₂(2πeσ²)","σ²","log₂(2πe)"],
+    ans: 1, topic: "Entropy",
+    diff: "hard",
+    exp: "The differential entropy of a Gaussian N(μ, σ²) is h(X) = ½ log₂(2πeσ²) nats (or bits if log₂ is used). Gaussian maximizes entropy for fixed variance."
+  },
+  {
+    q: "Reed-Solomon codes operate over:",
+    opts: ["Binary field GF(2)","Extension fields GF(2ᵐ)","Real numbers","Complex numbers"],
+    ans: 1, topic: "Advanced Codes",
+    diff: "hard",
+    exp: "Reed-Solomon codes are defined over Galois fields GF(2ᵐ). Symbols are elements of GF(2ᵐ), enabling correction of symbol errors rather than just bit errors."
+  },
+  {
+    q: "Which theorem states that no compression scheme can compress all messages without increasing some?",
+    opts: ["Shannon capacity theorem","Pigeonhole principle applied to source coding","Nyquist sampling theorem","Fano inequality"],
+    ans: 1, topic: "Source Coding",
+    diff: "medium",
+    exp: "By the pigeonhole principle, any lossless compression code must increase the length of at least one input — you cannot compress all messages below their average entropy."
+  }
+];
+
+/* ===== STATE ===== */
+let state = {
+  user: null,
+  current: 0,
+  answers: new Array(25).fill(null),
+  revealed: new Array(25).fill(false),
+  timerInterval: null,
+  secondsLeft: 25 * 60,
+  score: 0
+};
+
+/* ===== STORAGE ===== */
+function getAllAttempts() { return JSON.parse(localStorage.getItem('itc_attempts') || '[]'); }
+function saveAttempt(a) {
+  const arr = getAllAttempts();
+  arr.push(a);
+  localStorage.setItem('itc_attempts', JSON.stringify(arr));
+}
+function clearAll() {
+  if (!confirm('Clear ALL attempt history?')) return;
+  localStorage.removeItem('itc_attempts');
+  showToast('All data cleared.');
+  showDashboard();
+}
+
+/* ===== LANDING ===== */
+function updateLanding() {
+  const all = getAllAttempts();
+  document.getElementById('l-attempts').textContent = all.length;
+  if (all.length) {
+    const best = Math.max(...all.map(a => a.pct));
+    const avg = (all.reduce((s, a) => s + a.pct, 0) / all.length).toFixed(1);
+    document.getElementById('l-high').textContent = best.toFixed(1) + '%';
+    document.getElementById('l-avg').textContent = avg + '%';
+  }
+}
+
+function validateField(id, errId, check, msg) {
+  const val = document.getElementById(id).value.trim();
+  if (!check(val)) {
+    document.getElementById(id).classList.add('error');
+    document.getElementById(errId).textContent = msg;
+    return false;
+  }
+  document.getElementById(id).classList.remove('error');
+  document.getElementById(errId).textContent = '';
+  return true;
+}
+
+function startQuiz() {
+  const nameOk = validateField('inp-name', 'err-name', v => v.length >= 2, 'Name must be at least 2 characters.');
+  const rollOk = validateField('inp-roll', 'err-roll', v => v.length >= 2, 'Enter a valid Roll Number.');
+  const emailOk = validateField('inp-email', 'err-email', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), 'Enter a valid email address.');
+  const deptOk = validateField('inp-dept', 'err-dept', v => v !== '', 'Please select a department.');
+  if (!nameOk || !rollOk || !emailOk || !deptOk) return;
+
+  state.user = {
+    name: document.getElementById('inp-name').value.trim(),
+    roll: document.getElementById('inp-roll').value.trim(),
+    email: document.getElementById('inp-email').value.trim(),
+    dept: document.getElementById('inp-dept').value
+  };
+  state.answers = new Array(25).fill(null);
+  state.revealed = new Array(25).fill(false);
+  state.current = 0;
+  state.secondsLeft = 25 * 60;
+
+  document.getElementById('quiz-user').textContent = `${state.user.name} · ${state.user.roll}`;
+  showScreen('quiz');
+  renderQuestion();
+  renderNavDots();
+  startTimer();
+}
+
+/* ===== TIMER ===== */
+function startTimer() {
+  clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(() => {
+    state.secondsLeft--;
+    updateTimerDisplay();
+    if (state.secondsLeft <= 0) { clearInterval(state.timerInterval); submitQuiz(); }
+  }, 1000);
+}
+function updateTimerDisplay() {
+  const el = document.getElementById('timer');
+  const m = Math.floor(state.secondsLeft / 60);
+  const s = state.secondsLeft % 60;
+  el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className = 'timer-box';
+  if (state.secondsLeft <= 60) el.classList.add('danger');
+  else if (state.secondsLeft <= 300) el.classList.add('warning');
+}
+
+/* ===== QUIZ RENDER ===== */
+function renderQuestion() {
+  const i = state.current;
+  const q = QUESTIONS[i];
+  const answered = state.answers[i] !== null;
+  const revealed = state.revealed[i];
+  const pct = ((i + 1) / QUESTIONS.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${i + 1} / ${QUESTIONS.length}`;
+
+  const diffClass = { easy: 'diff-easy', medium: 'diff-medium', hard: 'diff-hard' }[q.diff];
+  let optsHtml = q.opts.map((opt, oi) => {
+    let cls = 'option';
+    if (revealed) {
+      cls += ' disabled';
+      if (oi === q.ans) cls += ' correct';
+      else if (oi === state.answers[i]) cls += ' wrong';
+    } else {
+      if (state.answers[i] === oi) cls += ' selected';
+    }
+    const label = String.fromCharCode(65 + oi);
+    return `<div class="${cls}" onclick="selectOption(${oi})">
+      <div class="opt-label">${label}</div>
+      <div>${opt}</div>
+    </div>`;
+  }).join('');
+
+  const expHtml = revealed ? `<div class="explanation">💡 ${q.exp}</div>` : '';
+
+  document.getElementById('question-area').innerHTML = `
+    <div class="question-card">
+      <div class="q-meta">
+        <div class="q-num">Question ${i + 1} of ${QUESTIONS.length} · ${q.topic}</div>
+        <div class="q-difficulty ${diffClass}">${q.diff}</div>
+      </div>
+      <div class="q-text">${q.q}</div>
+      <div class="options">${optsHtml}</div>
+      ${expHtml}
+    </div>`;
+
+  document.getElementById('btn-prev').style.opacity = i === 0 ? '0.3' : '1';
+  updateNavDots();
+}
+
+function selectOption(oi) {
+  if (state.revealed[state.current]) return;
+  state.answers[state.current] = oi;
+  state.revealed[state.current] = true;
+  renderQuestion();
+  updateNavDots();
+}
+
+function navigate(dir) {
+  const next = state.current + dir;
+  if (next < 0 || next >= QUESTIONS.length) return;
+  state.current = next;
+  renderQuestion();
+}
+
+function renderNavDots() {
+  const el = document.getElementById('nav-dots');
+  el.innerHTML = QUESTIONS.map((_, i) => `<div class="nav-dot" id="nd-${i}" onclick="jumpTo(${i})">${i+1}</div>`).join('');
+}
+function updateNavDots() {
+  QUESTIONS.forEach((q, i) => {
+    const el = document.getElementById('nd-' + i);
+    if (!el) return;
+    el.className = 'nav-dot';
+    if (i === state.current) el.classList.add('current');
+    if (state.revealed[i]) {
+      el.classList.add(state.answers[i] === q.ans ? 'answered-correct' : 'answered-wrong');
+    }
+  });
+}
+function jumpTo(i) { state.current = i; renderQuestion(); }
+
+function confirmSubmit() {
+  const unanswered = state.answers.filter(a => a === null).length;
+  if (unanswered > 0 && !confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`)) return;
+  clearInterval(state.timerInterval);
+  submitQuiz();
+}
+
+/* ===== SUBMIT ===== */
+function submitQuiz() {
+  clearInterval(state.timerInterval);
+  let correct = 0, wrong = 0, skipped = 0;
+  const topicWrong = {};
+  QUESTIONS.forEach((q, i) => {
+    if (state.answers[i] === null) { skipped++; }
+    else if (state.answers[i] === q.ans) { correct++; }
+    else {
+      wrong++;
+      topicWrong[q.topic] = (topicWrong[q.topic] || 0) + 1;
+    }
+  });
+  const pct = Math.round((correct / QUESTIONS.length) * 100);
+  const grade = getGrade(pct);
+  const timeTaken = (25 * 60 - state.secondsLeft);
+  const attempt = {
+    id: Date.now(),
+    name: state.user.name,
+    roll: state.user.roll,
+    email: state.user.email,
+    dept: state.user.dept,
+    date: new Date().toLocaleDateString('en-IN'),
+    correct, wrong, skipped,
+    pct, grade, timeTaken,
+    answers: [...state.answers],
+    topicWrong
+  };
+  saveAttempt(attempt);
+  showResults(attempt);
+}
+
+function getGrade(pct) {
+  if (pct >= 90) return 'S';
+  if (pct >= 80) return 'A';
+  if (pct >= 70) return 'B';
+  if (pct >= 60) return 'C';
+  if (pct >= 50) return 'D';
+  return 'F';
+}
+function gradeColor(g) {
+  return {S:'#00e5ff',A:'#10b981',B:'#7c3aed',C:'#f59e0b',D:'#f97316',F:'#ef4444'}[g] || '#94a3b8';
+}
+function gradeLabel(g) {
+  return {S:'Outstanding',A:'Excellent',B:'Good',C:'Average',D:'Below Average',F:'Fail'}[g] || '';
+}
+
+/* ===== RESULTS ===== */
+function showResults(attempt) {
+  showScreen('results');
+  document.getElementById('result-name').textContent = `${attempt.name} · ${attempt.roll} · ${attempt.dept}`;
+
+  // Award
+  if (attempt.pct >= 90) {
+    document.getElementById('award-display').innerHTML = `<div style="font-size:3rem;margin-bottom:0.5rem">🏆</div><div style="font-family:var(--font-head);font-size:0.9rem;font-weight:700;color:var(--accent4);margin-bottom:1rem;letter-spacing:0.1em">TOP SCORER AWARD</div>`;
+  } else { document.getElementById('award-display').innerHTML = ''; }
+
+  // Ring animation
+  const pct = attempt.pct;
+  const ring = document.getElementById('ring-fill');
+  const circumference = 414.69;
+  const offset = circumference - (pct / 100) * circumference;
+  ring.style.transition = 'stroke-dashoffset 1.2s ease';
+  ring.style.stroke = gradeColor(attempt.grade);
+  setTimeout(() => { ring.style.strokeDashoffset = offset; }, 100);
+  document.getElementById('score-pct').textContent = pct + '%';
+
+  const gEl = document.getElementById('grade-badge');
+  gEl.textContent = `Grade ${attempt.grade} — ${gradeLabel(attempt.grade)}`;
+  gEl.style.background = gradeColor(attempt.grade) + '22';
+  gEl.style.color = gradeColor(attempt.grade);
+  gEl.style.border = `1px solid ${gradeColor(attempt.grade)}55`;
+
+  // Metrics
+  const fmt = s => `${Math.floor(s/60)}m ${s%60}s`;
+  document.getElementById('metrics-grid').innerHTML = [
+    {val: attempt.correct, lbl: 'Correct', color: 'var(--correct)'},
+    {val: attempt.wrong, lbl: 'Wrong', color: 'var(--wrong)'},
+    {val: attempt.skipped, lbl: 'Skipped', color: 'var(--text2)'},
+    {val: pct + '%', lbl: 'Score', color: 'var(--accent)'},
+    {val: attempt.grade, lbl: 'Grade', color: gradeColor(attempt.grade)},
+    {val: fmt(attempt.timeTaken), lbl: 'Time Taken', color: 'var(--text)'},
+  ].map(m => `<div class="metric-card"><div class="m-val" style="color:${m.color}">${m.val}</div><div class="m-lbl">${m.lbl}</div></div>`).join('');
+
+  // Wrong chart
+  const topics = Object.keys(attempt.topicWrong);
+  const counts = topics.map(t => attempt.topicWrong[t]);
+  renderWrongChart('wrong-chart', topics, counts);
+
+  // Response sheet
+  document.getElementById('response-rows').innerHTML = QUESTIONS.map((q, i) => {
+    const ans = attempt.answers[i];
+    const correct = ans === q.ans;
+    const skipped = ans === null;
+    const rowCls = skipped ? 'skipped-row' : correct ? 'correct-row' : 'wrong-row';
+    const dotCls = skipped ? 'dot-s' : correct ? 'dot-c' : 'dot-w';
+    const yourAns = ans === null ? '—' : String.fromCharCode(65 + ans);
+    const corrAns = String.fromCharCode(65 + q.ans);
+    return `<div class="rs-row ${rowCls}">
+      <div style="color:var(--text2)">${i+1}</div>
+      <div><span class="status-dot ${dotCls}"></span>${q.q.substring(0,50)}...</div>
+      <div class="rs-answer" style="text-align:center;font-weight:700;color:${correct?'var(--correct)':skipped?'var(--text3)':'var(--wrong)'}">${yourAns}</div>
+      <div style="text-align:center;font-weight:700;color:var(--correct)">${corrAns}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderWrongChart(canvasId, labels, data) {
+  const el = document.getElementById(canvasId);
+  if (!el) return;
+  if (el._chart) el._chart.destroy();
+  if (!labels.length) {
+    el.parentElement.innerHTML += `<p style="color:var(--text2);font-size:12px;text-align:center;padding:1rem">No wrong answers recorded!</p>`;
+    return;
+  }
+  el._chart = new Chart(el, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Wrong Answers',
+        data,
+        backgroundColor: labels.map(() => 'rgba(239,68,68,0.6)'),
+        borderColor: labels.map(() => '#ef4444'),
+        borderWidth: 1,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false },
+        tooltip: { backgroundColor: '#141c2e', borderColor: '#1e2d45', borderWidth: 1, titleColor: '#e2e8f0', bodyColor: '#94a3b8' }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { family: 'Space Mono', size: 11 } } },
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', stepSize: 1, font: { family: 'Space Mono', size: 11 } } }
+      }
+    }
+  });
+}
+
+/* ===== DASHBOARD ===== */
+function showDashboard() {
+  showScreen('dashboard');
+  const all = getAllAttempts();
+
+  // Metrics
+  const metEl = document.getElementById('dash-metrics');
+  if (!all.length) {
+    metEl.innerHTML = `<p style="color:var(--text2);grid-column:1/-1">No attempts yet. Take the quiz first!</p>`;
+    document.getElementById('leaderboard-list').innerHTML = '';
+    document.getElementById('award-topper').innerHTML = '';
+    document.getElementById('dash-wrong-chart').parentElement.style.display = 'none';
+    document.getElementById('dist-chart').parentElement.style.display = 'none';
+  } else {
+    document.getElementById('dash-wrong-chart').parentElement.style.display = '';
+    document.getElementById('dist-chart').parentElement.style.display = '';
+    const best = Math.max(...all.map(a => a.pct));
+    const avg = (all.reduce((s, a) => s + a.pct, 0) / all.length).toFixed(1);
+    const totalCorrect = all.reduce((s, a) => s + a.correct, 0);
+    metEl.innerHTML = [
+      {val: all.length, lbl: 'Total Attempts'},
+      {val: best.toFixed(1)+'%', lbl: 'Highest Score'},
+      {val: avg+'%', lbl: 'Average Score'},
+      {val: totalCorrect, lbl: 'Total Correct Ans'},
+    ].map(m => `<div class="metric-card"><div class="m-val">${m.val}</div><div class="m-lbl">${m.lbl}</div></div>`).join('');
+
+    // Topper award
+    const topper = all.reduce((b, a) => a.pct > b.pct ? a : b);
+    document.getElementById('award-topper').innerHTML = topper.pct >= 80 ? `
+      <div class="award-banner">
+        <div class="award-icon">🏆</div>
+        <div class="award-text">
+          <h3>${topper.pct >= 90 ? '🥇 Gold Award — Outstanding Performance' : '🥈 Silver Award — Excellent Performance'}</h3>
+          <p><strong style="color:#fff">${topper.name}</strong> (${topper.roll}) achieved <strong style="color:var(--accent4)">${topper.pct}%</strong> — Grade ${topper.grade} on ${topper.date}.<br>
+          ${topper.correct}/25 correct in ${Math.floor(topper.timeTaken/60)}m ${topper.timeTaken%60}s.</p>
+        </div>
+      </div>` : '';
+
+    // Leaderboard
+    const sorted = [...all].sort((a, b) => b.pct - a.pct);
+    const colors = ['#e3a008','#94a3b8','#b45309'];
+    const rankEmoji = ['🥇','🥈','🥉'];
+    document.getElementById('leaderboard-list').innerHTML = sorted.slice(0, 10).map((a, i) => {
+      const bgColors = ['#e3a00818','#94a3b818','#b4530918'];
+      const bgColor = bgColors[i] || '#1a2235';
+      const initials = a.name.split(' ').map(w => w[0]).join('').toUpperCase().substring(0,2);
+      const tc = i < 3 ? colors[i] : 'var(--accent)';
+      return `<div class="lb-row rank${i+1}" style="background:${bgColor}">
+        <div class="lb-rank" style="color:${tc}">${i < 3 ? rankEmoji[i] : '#'+(i+1)}</div>
+        <div class="lb-avatar" style="background:${tc}22;color:${tc}">${initials}</div>
+        <div class="lb-info">
+          <div class="lb-name">${a.name}</div>
+          <div class="lb-meta">${a.roll} · ${a.dept.substring(0,20)} · ${a.date}</div>
+        </div>
+        <div>
+          <div class="lb-score">${a.pct}%</div>
+          <div class="lb-grade">Grade ${a.grade}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Score distribution chart
+    const buckets = {'0-49': 0, '50-59': 0, '60-69': 0, '70-79': 0, '80-89': 0, '90-100': 0};
+    all.forEach(a => {
+      if (a.pct < 50) buckets['0-49']++;
+      else if (a.pct < 60) buckets['50-59']++;
+      else if (a.pct < 70) buckets['60-69']++;
+      else if (a.pct < 80) buckets['70-79']++;
+      else if (a.pct < 90) buckets['80-89']++;
+      else buckets['90-100']++;
+    });
+    const dcEl = document.getElementById('dist-chart');
+    if (dcEl._chart) dcEl._chart.destroy();
+    dcEl._chart = new Chart(dcEl, {
+      type: 'bar',
+      data: {
+        labels: Object.keys(buckets),
+        datasets: [{
+          data: Object.values(buckets),
+          backgroundColor: ['#ef444488','#f97316aa','#f59e0baa','#7c3aedaa','#10b981aa','#00e5ffaa'],
+          borderRadius: 8, borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: {display:false}, tooltip: { backgroundColor:'#141c2e', borderColor:'#1e2d45', borderWidth:1, titleColor:'#e2e8f0', bodyColor:'#94a3b8' }},
+        scales: {
+          x: { grid:{color:'rgba(255,255,255,0.05)'}, ticks:{color:'#94a3b8', font:{family:'Space Mono',size:11}} },
+          y: { grid:{color:'rgba(255,255,255,0.05)'}, ticks:{color:'#94a3b8', stepSize:1, font:{family:'Space Mono',size:11}} }
+        }
+      }
+    });
+
+    // Aggregate wrong-by-topic
+    const allTopicWrong = {};
+    all.forEach(a => {
+      Object.entries(a.topicWrong || {}).forEach(([t, c]) => {
+        allTopicWrong[t] = (allTopicWrong[t] || 0) + c;
+      });
+    });
+    renderWrongChart('dash-wrong-chart', Object.keys(allTopicWrong), Object.values(allTopicWrong));
+  }
+
+  // Email select
+  const sel = document.getElementById('email-select');
+  sel.innerHTML = all.length ? all.map(a => `<option value="${a.id}">${a.name} — ${a.pct}% (${a.date})</option>`).join('') : '<option>No attempts</option>';
+}
+
+/* ===== EMAIL SEND ===== */
+function sendScore() {
+  const sel = document.getElementById('email-select');
+  const emailTo = document.getElementById('email-to').value.trim();
+  if (!emailTo || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTo)) { showToast('Enter a valid recipient email.'); return; }
+  const all = getAllAttempts();
+  const id = parseInt(sel.value);
+  const a = all.find(x => x.id === id);
+  if (!a) return;
+  const subject = encodeURIComponent(`Score Report: Information Theory & Coding — ${a.name}`);
+  const body = encodeURIComponent(
+    `Score Report — Information Theory & Coding\n` +
+    `==========================================\n` +
+    `Name:       ${a.name}\n` +
+    `Roll No:    ${a.roll}\n` +
+    `Department: ${a.dept}\n` +
+    `Date:       ${a.date}\n\n` +
+    `Score:      ${a.pct}%\n` +
+    `Grade:      ${a.grade} (${gradeLabel(a.grade)})\n` +
+    `Correct:    ${a.correct} / 25\n` +
+    `Wrong:      ${a.wrong}\n` +
+    `Skipped:    ${a.skipped}\n` +
+    `Time Taken: ${Math.floor(a.timeTaken/60)}m ${a.timeTaken%60}s\n\n` +
+    `Generated by MCQ Assessment Tool`
+  );
+  window.location.href = `mailto:${emailTo}?subject=${subject}&body=${body}`;
+  showToast('Opening mail client...');
+}
+
+/* ===== PDF DOWNLOAD ===== */
+function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const all = getAllAttempts();
+  if (!all.length) { showToast('No attempt data found.'); return; }
+  const a = all[all.length - 1];
+  const gc = gradeColor(a.grade).replace('var(--correct)', '#10b981').replace('var(--wrong)','#ef4444');
+  const gradeHex = { S:'#00e5ff', A:'#10b981', B:'#7c3aed', C:'#f59e0b', D:'#f97316', F:'#ef4444' };
+  const gh = gradeHex[a.grade] || '#94a3b8';
+
+  // Header
+  doc.setFillColor(10, 14, 26);
+  doc.rect(0, 0, 210, 40, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.setTextColor(0, 229, 255);
+  doc.text('Information Theory & Coding', 15, 15);
+  doc.setFontSize(10);
+  doc.setTextColor(148, 163, 184);
+  doc.text('Score Report & Grade Card', 15, 23);
+  doc.setFontSize(9);
+  doc.text(`Generated: ${new Date().toLocaleString('en-IN')}`, 15, 31);
+
+  // Grade badge
+  const r = parseInt(gh.slice(1,3), 16), g2 = parseInt(gh.slice(3,5), 16), b2 = parseInt(gh.slice(5,7), 16);
+  doc.setFillColor(r, g2, b2);
+  doc.roundedRect(155, 8, 40, 22, 4, 4, 'F');
+  doc.setTextColor(0, 0, 0);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(22);
+  doc.text(`${a.pct}%`, 175, 20, { align: 'center' });
+  doc.setFontSize(8);
+  doc.text(`Grade ${a.grade}`, 175, 27, { align: 'center' });
+
+  // Student Info
+  let y = 50;
+  doc.setFillColor(20, 28, 46);
+  doc.roundedRect(10, y - 4, 190, 44, 4, 4, 'F');
+  doc.setTextColor(0, 229, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.text('STUDENT INFORMATION', 15, y + 4);
+  doc.setTextColor(148, 163, 184);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  const fields = [['Name', a.name], ['Roll No', a.roll], ['Email', a.email], ['Department', a.dept], ['Date', a.date]];
+  fields.forEach(([k, v], i) => {
+    const col = i < 3 ? 15 : 110;
+    const row = i < 3 ? y + 12 + i * 9 : y + 12 + (i - 3) * 9;
+    doc.setTextColor(100, 116, 139); doc.text(k + ':', col, row);
+    doc.setTextColor(226, 232, 240); doc.text(v, col + 28, row);
+  });
+  y += 52;
+
+  // Score summary
+  doc.setFillColor(20, 28, 46);
+  doc.roundedRect(10, y, 190, 36, 4, 4, 'F');
+  const metrics = [
+    ['Correct', a.correct, '#10b981'],
+    ['Wrong', a.wrong, '#ef4444'],
+    ['Skipped', a.skipped, '#94a3b8'],
+    ['Score', a.pct + '%', gh],
+    ['Grade', a.grade, gh],
+    ['Time', `${Math.floor(a.timeTaken/60)}m${a.timeTaken%60}s`, '#e2e8f0']
+  ];
+  metrics.forEach(([label, val, color], i) => {
+    const x = 15 + i * 31;
+    doc.setTextColor(100, 116, 139); doc.setFontSize(7);
+    doc.text(label.toUpperCase(), x, y + 12);
+    const cr = parseInt(color.slice(1,3)||'94',16), cg = parseInt(color.slice(3,5)||'a3',16), cb = parseInt(color.slice(5,7)||'b8',16);
+    doc.setTextColor(cr, cg, cb);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
+    doc.text(String(val), x, y + 24);
+    doc.setFont('helvetica', 'normal');
+  });
+  y += 44;
+
+  // Response sheet
+  doc.setTextColor(0, 229, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.text('RESPONSE SHEET', 15, y + 8);
+  y += 14;
+
+  doc.setFillColor(26, 34, 53);
+  doc.rect(10, y, 190, 7, 'F');
+  doc.setTextColor(100, 116, 139);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.text('#', 14, y + 5);
+  doc.text('Question (truncated)', 22, y + 5);
+  doc.text('Yours', 148, y + 5);
+  doc.text('Correct', 163, y + 5);
+  doc.text('Status', 182, y + 5);
+  y += 10;
+
+  QUESTIONS.forEach((q, i) => {
+    if (y > 265) { doc.addPage(); y = 20; }
+    const ans = a.answers[i];
+    const isCorrect = ans === q.ans;
+    const isSkipped = ans === null;
+    const rowColor = isSkipped ? [26, 34, 53] : isCorrect ? [10, 60, 45] : [60, 10, 15];
+    doc.setFillColor(...rowColor);
+    doc.rect(10, y - 2, 190, 7, 'F');
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(148, 163, 184);
+    doc.text(String(i + 1), 14, y + 3);
+    const qShort = q.q.length > 70 ? q.q.substring(0, 70) + '...' : q.q;
+    doc.setTextColor(226, 232, 240);
+    doc.text(qShort, 22, y + 3);
+    const yourAns = ans === null ? '—' : String.fromCharCode(65 + ans);
+    const corrAns = String.fromCharCode(65 + q.ans);
+    doc.setTextColor(148, 163, 184); doc.text(yourAns, 152, y + 3, { align: 'center' });
+    doc.setTextColor(16, 185, 129); doc.text(corrAns, 167, y + 3, { align: 'center' });
+    const statusText = isSkipped ? 'SKIP' : isCorrect ? '✓' : '✗';
+    const sc = isSkipped ? [100, 116, 139] : isCorrect ? [16, 185, 129] : [239, 68, 68];
+    doc.setTextColor(...sc);
+    doc.setFont('helvetica', 'bold');
+    doc.text(statusText, 186, y + 3, { align: 'center' });
+    y += 8;
+  });
+
+  // Footer
+  doc.setFillColor(10, 14, 26);
+  doc.rect(0, 285, 210, 15, 'F');
+  doc.setTextColor(100, 116, 139);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.text('MCQ Assessment Tool — Information Theory & Coding  |  Auto-generated report', 105, 292, { align: 'center' });
+
+  doc.save(`ITC_Report_${a.name.replace(/\s+/g, '_')}_${a.roll}.pdf`);
+  showToast('PDF downloaded!');
+}
+
+/* ===== UTILS ===== */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function resetQuiz() {
+  clearInterval(state.timerInterval);
+  document.getElementById('inp-name').value = '';
+  document.getElementById('inp-roll').value = '';
+  document.getElementById('inp-email').value = '';
+  document.getElementById('inp-dept').value = '';
+  showScreen('landing');
+  updateLanding();
+}
+
+/* ===== INIT ===== */
+updateLanding();
+</script>
+</body>
+</html>
